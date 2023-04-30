@@ -122,14 +122,14 @@ impl Modem {
 	/// The timezone data provided by the network. It may include one or more
 	/// of the following fields:
 	///
-	///      	"offset" 				Offset of the timezone from UTC, in minutes (including
-	/// 											DST, if applicable), given as a signed integer value.
+	///    "offset"        Offset of the timezone from UTC, in minutes (including
+	///                    DST, if applicable), given as a signed integer value.
 	///
-	///				"dst-offset"		Amount of offset that is due to DST (daylight saving
-	/// 											time), given as a signed integer value.
+	///    "dst-offset"    Amount of offset that is due to DST (daylight saving
+	///                    time), given as a signed integer value.
 	///
-	///				"leap-seconds"	Number of leap seconds included in the network time,
-	/// 											given as a signed integer value.
+	///    "leap-seconds"  Number of leap seconds included in the network time,
+	///                    given as a signed integer value.
 	pub fn network_timezone(&self) -> Result<NetworkTimezone, dbus::Error> {
 		let data = self.dbus.proxy(&self.path).network_timezone()?;
 		NetworkTimezone::from_prop_map(data)
