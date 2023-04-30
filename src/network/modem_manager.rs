@@ -131,7 +131,9 @@ impl Modem {
 	///				"leap-seconds"	Number of leap seconds included in the network time,
 	/// 											given as a signed integer value.
 	pub fn network_timezone(&self) -> Result<arg::PropMap, dbus::Error> {
-		self.dbus.proxy(&self.path).network_timezone()
+		let data = self.dbus.proxy(&self.path).network_timezone()?;
+		NetworkTimezone::from_prop_map(data)
+			.ok_or_else(|| Error::new_failed("network timezone not found"))
 	}
 
 	/// Signal quality in percent (0 - 100) of the dominant access technology
@@ -387,6 +389,28 @@ impl ModemMode {
 impl From<u32> for ModemMode {
 	fn from(num: u32) -> Self {
 		Self(num)
+	}
+}
+
+pub struct NetworkTimezone {
+	/// Offset of the timezone from UTC, in minutes (including DST, if applicable), given as a signed integer value.
+	pub offset: i64,
+	/// Amount of offset that is due to DST (daylight saving time), given as a signed integer value.
+	pub dst_offset: i64,
+	/// Number of leap seconds included in the network time, given as a signed integer value.
+	pub leap_seconds: i64
+}
+
+impl NetworkTimezone {
+	fn from_prop_map(prop: PropMap) -> Option<Self> {
+		Some(Self {
+			offset: prop.get("offset")?
+				.as_i64()?,
+			dst_offset: prop.get("dst-offset")?
+				.as_i64()?,
+			leap_seconds: prop.get("leap-seconds")?
+				.as_i64()?
+		})
 	}
 }
 
