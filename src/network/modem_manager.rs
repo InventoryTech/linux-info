@@ -130,7 +130,7 @@ impl Modem {
 	///
 	///				"leap-seconds"	Number of leap seconds included in the network time,
 	/// 											given as a signed integer value.
-	pub fn network_timezone(&self) -> Result<arg::PropMap, dbus::Error> {
+	pub fn network_timezone(&self) -> Result<NetworkTimezone, dbus::Error> {
 		let data = self.dbus.proxy(&self.path).network_timezone()?;
 		NetworkTimezone::from_prop_map(data)
 			.ok_or_else(|| Error::new_failed("network timezone not found"))
