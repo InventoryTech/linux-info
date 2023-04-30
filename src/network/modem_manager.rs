@@ -392,6 +392,12 @@ impl From<u32> for ModemMode {
 	}
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(
+	feature = "serde",
+	derive(serde1::Serialize, serde1::Deserialize),
+	serde(crate = "serde1", rename = "camelCase")
+)]
 pub struct NetworkTimezone {
 	/// Offset of the timezone from UTC, in minutes (including DST, if applicable), given as a signed integer value.
 	pub offset: i64,
