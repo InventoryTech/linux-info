@@ -32,7 +32,7 @@ memchr = "2.4.1"
 uuid = "0.8"
 serde1 = { package = "serde", version = "1.0", features = ["derive"], optional = true }
 nmdbus = { version = "1.20", optional = true }
-mmdbus = { version = "1.16", optional = true }
+mmdbus = { version = "1.18.6", optional = true }
 dbus = { version = "0.9", optional = true }
 
 [package.metadata.docs.rs]

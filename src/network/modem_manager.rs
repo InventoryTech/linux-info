@@ -10,6 +10,7 @@ use dbus::arg::{RefArg, PropMap};
 
 use mmdbus::modem::Modem as ModemAccess;
 use mmdbus::modem_signal::ModemSignal;
+use mmdbus::modem_time::ModemTime;
 use mmdbus::modem_modem3gpp::ModemModem3gpp;
 use mmdbus::sim::Sim as SimTrait;
 
@@ -105,12 +106,39 @@ impl Modem {
 		self.dbus.proxy(&self.path).state()
 			.map(Into::into)
 	}
-	
+
+	/// Returns the time, and (if available) UTC offset in ISO 8601 format. If
+	/// the network time is unknown, the empty string.
+	///
+	/// Gets the current network time in local time.
+	///
+	/// This method will only work if the modem tracks, or can request, the
+	/// current network time; it will not attempt to use previously-received
+	/// network time updates on the host to guess the current network time.
+	pub fn get_network_time(&self) -> Result<String, Error> {
+		self.dbus.proxy(&self.path).get_network_time()
+	}
+
+	/// The timezone data provided by the network. It may include one or more
+	/// of the following fields:
+	///
+	///      	"offset" 				Offset of the timezone from UTC, in minutes (including
+	/// 											DST, if applicable), given as a signed integer value.
+	///
+	///				"dst-offset"		Amount of offset that is due to DST (daylight saving
+	/// 											time), given as a signed integer value.
+	///
+	///				"leap-seconds"	Number of leap seconds included in the network time,
+	/// 											given as a signed integer value.
+	pub fn network_timezone(&self) -> Result<arg::PropMap, dbus::Error> {
+		self.dbus.proxy(&self.path).network_timezone()
+	}
+
 	/// Signal quality in percent (0 - 100) of the dominant access technology
 	/// the device is using to communicate with the network. Always 0 for
-	/// POTS devices.  
+	/// POTS devices.
 	/// The additional boolean value indicates if the quality value given was
-	/// recently taken. 
+	/// recently taken.
 	pub fn signal_quality(&self) -> Result<(u32, bool), Error> {
 		self.dbus.proxy(&self.path).signal_quality()
 	}
@@ -118,7 +146,7 @@ impl Modem {
 	/// A pair of MMModemMode values, where the first one is a bitmask
 	/// specifying the access technologies (eg 2G/3G/4G) the device is
 	/// currently allowed to use when connecting to a network, and the second
-	/// one is the preferred mode of those specified as allowed. 
+	/// one is the preferred mode of those specified as allowed.
 	pub fn current_modes(&self) -> Result<(ModemMode, ModemMode), Error> {
 		self.dbus.proxy(&self.path).current_modes()
 			.map(|(a, b)| (a.into(), b.into()))
@@ -187,7 +215,7 @@ impl Modem {
 	}
 
 	/// The IMEI of the device.
-	/// 
+	///
 	/// ## Note
 	/// This interface will only be available once the modem is ready to be
 	/// registered in the cellular network. 3GPP devices will require a valid
@@ -201,7 +229,7 @@ impl Modem {
 	///
 	/// If the operator name is not known or the mobile is not registered to a
 	/// mobile network, this property will be an empty string.
-	/// 
+	///
 	/// ## Note
 	/// This interface will only be available once the modem is ready to be
 	/// registered in the cellular network. 3GPP devices will require a valid
