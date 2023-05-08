@@ -404,19 +404,38 @@ pub struct NetworkTimezone {
 	/// Amount of offset that is due to DST (daylight saving time), given as a signed integer value.
 	pub dst_offset: i64,
 	/// Number of leap seconds included in the network time, given as a signed integer value.
-	pub leap_seconds: i64
+	pub leap_seconds: i64,
 }
 
 impl NetworkTimezone {
 	fn from_prop_map(prop: PropMap) -> Option<Self> {
-		Some(Self {
-			offset: prop.get("offset")?
-				.as_i64()?,
-			dst_offset: prop.get("dst-offset")?
-				.as_i64()?,
-			leap_seconds: prop.get("leap-seconds")?
-				.as_i64()?
-		})
+		let mut value_offset = 0;
+		let mut value_dst_offset = 0;
+		let mut value_leap_seconds = 0;
+
+		if let Some(prop_offset) = prop.get("offset") {
+			if prop_offset.as_i64().is_some() {
+				value_offset = prop_offset.as_i64().unwrap();
+			}
+		}
+		if let Some(prop_dst_offset) = prop.get("dst-offset") {
+			if prop_dst_offset.as_i64().is_some() {
+				value_dst_offset = prop_dst_offset.as_i64().unwrap();
+			}
+		}
+		if let Some(prop_leap_seconds) = prop.get("leap-seconds") {
+			if prop_leap_seconds.as_i64().is_some() {
+				value_leap_seconds = prop_leap_seconds.as_i64().unwrap();
+			}
+		}
+
+		let value = Some(Self {
+			offset: value_offset,
+			dst_offset: value_dst_offset,
+			leap_seconds: value_leap_seconds,
+		});
+
+		return value;
 	}
 }
 
