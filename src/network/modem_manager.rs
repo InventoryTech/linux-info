@@ -136,6 +136,23 @@ impl Modem {
 			.ok_or_else(|| Error::new_failed("network timezone not found"))
 	}
 
+	/// Enable or disable the modem.
+	///
+	/// When enabled, the modem's radio is powered on and data sessions, voice
+	/// calls, location services, and Short Message Service may be available.
+	///
+	/// When disabled, the modem enters low-power state and no network-related
+	/// operations are available.
+	pub fn enable(&self, enable: bool) -> Result<(), Error> {
+		self.dbus.proxy(&self.path).enable(enable)
+	}
+
+	/// Set the power state of the modem. This action can only be run when the modem
+	/// is in MM_MODEM_STATE_DISABLED state.
+	pub fn set_power_state(&self, state: ModemPowerState) -> Result<(), Error> {
+		self.dbus.proxy(&self.path).set_power_state(state as u32)
+	}
+
 	/// Signal quality in percent (0 - 100) of the dominant access technology
 	/// the device is using to communicate with the network. Always 0 for
 	/// POTS devices.
@@ -281,6 +298,23 @@ impl Sim {
 	}
 }
 
+#[repr(i32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(
+	feature = "serde",
+	derive(serde1::Serialize, serde1::Deserialize),
+	serde(crate = "serde1")
+)]
+pub enum ModemPowerState {
+	/// Unknown power state.
+	Unknown = 0,
+	/// Off.
+	Off = 1,
+	/// Low-power mode.
+	Low = 2,
+	/// Full power mode.
+	On = 3,
+}
 
 #[repr(i32)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

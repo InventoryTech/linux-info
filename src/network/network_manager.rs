@@ -61,6 +61,10 @@ impl NetworkManager {
 
 		Ok(devices)
 	}
+
+	pub fn activate_connection(&self, connection: dbus::Path, device: Device, specific_object: dbus::Path) -> Result<dbus::Path<'static>, dbus::Error> {
+		return self.dbus.proxy(DBUS_PATH).activate_connection(connection, device.get_object_path().to_owned(), specific_object);
+	}
 }
 
 pub struct Device {
@@ -69,9 +73,15 @@ pub struct Device {
 }
 
 impl Device {
-	/// The path of the device as exposed by the udev property ID_PATH.  
+	/// Returns the actual object path of this device to be used when
+	/// activitating connections by device.
+	pub fn get_object_path(&self) -> &Path<'static> {
+		return &self.path;
+	}
+
+	/// The path of the device as exposed by the udev property ID_PATH.
 	/// Note that non-UTF-8 characters are backslash escaped.
-	/// Use g_strcompress() to obtain the true (non-UTF-8) string. 
+	/// Use g_strcompress() to obtain the true (non-UTF-8) string.
 	pub fn path(&self) -> Result<String, Error> {
 		self.dbus.proxy(&self.path).path()
 	}
@@ -85,12 +95,12 @@ impl Device {
 	}
 
 	/// The driver handling the device. Non-UTF-8 sequences are backslash
-	/// escaped. Use g_strcompress() to revert. 
+	/// escaped. Use g_strcompress() to revert.
 	pub fn driver(&self) -> Result<String, Error> {
 		self.dbus.proxy(&self.path).driver()
 	}
 
-	/// The current state of the device. 
+	/// The current state of the device.
 	pub fn state(&self) -> Result<DeviceState, Error> {
 		DeviceTrait::state(&self.dbus.proxy(&self.path))
 			.map(Into::into)
@@ -115,6 +125,20 @@ impl Device {
 	/// The access point name the modem is connected to. Blank if disconnected.
 	pub fn modem_apn(&self) -> Result<String, Error> {
 		self.dbus.proxy(&self.path).apn()
+	}
+
+	/// Object path of an ActiveConnection object that "owns" this device during
+	/// activation. The ActiveConnection object tracks the life-cycle of a
+	/// connection to a specific network and implements the
+	/// org.freedesktop.NetworkManager.Connection.Active D-Bus interface.
+	pub fn active_connection(&self) -> Result<dbus::Path<'static>, Error> {
+		self.dbus.proxy(&self.path).active_connection()
+	}
+
+	/// An array of object paths of every configured connection that is currently
+	/// 'available' through this device.
+	pub fn available_connections(&self) -> Result<Vec<dbus::Path<'static>>, Error> {
+		self.dbus.proxy(&self.path).available_connections()
 	}
 }
 
