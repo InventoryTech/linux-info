@@ -136,6 +136,13 @@ impl Modem {
 			.ok_or_else(|| Error::new_failed("network timezone not found"))
 	}
 
+	/// Clear non-persistent configuration and state, and return the device to a newly-powered-on state.
+	///
+	/// This command may power-cycle the device.
+	pub fn reset(&self) -> Result<(), Error> {
+		self.dbus.proxy(&self.path).reset()
+	}
+
 	/// Enable or disable the modem.
 	///
 	/// When enabled, the modem's radio is powered on and data sessions, voice
