@@ -132,8 +132,7 @@ impl Modem {
 	///                    given as a signed integer value.
 	pub fn network_timezone(&self) -> Result<NetworkTimezone, dbus::Error> {
 		let data = self.dbus.proxy(&self.path).network_timezone()?;
-		NetworkTimezone::from_prop_map(data)
-			.ok_or_else(|| Error::new_failed("network timezone not found"))
+		Ok(NetworkTimezone::from_prop_map(data))
 	}
 
 	/// Clear non-persistent configuration and state, and return the device to a newly-powered-on state.
