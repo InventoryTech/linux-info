@@ -441,18 +441,18 @@ impl From<u32> for ModemMode {
 )]
 pub struct NetworkTimezone {
 	/// Offset of the timezone from UTC, in minutes (including DST, if applicable), given as a signed integer value.
-	pub offset: i64,
+	pub offset: Some(i64),
 	/// Amount of offset that is due to DST (daylight saving time), given as a signed integer value.
-	pub dst_offset: i64,
+	pub dst_offset: Some(i64),
 	/// Number of leap seconds included in the network time, given as a signed integer value.
-	pub leap_seconds: i64,
+	pub leap_seconds: Some(i64),
 }
 
 impl NetworkTimezone {
-	fn from_prop_map(prop: PropMap) -> Option<Self> {
-		let mut value_offset = 0;
-		let mut value_dst_offset = 0;
-		let mut value_leap_seconds = 0;
+	fn from_prop_map(prop: PropMap) -> Self {
+		let mut value_offset = None;
+		let mut value_dst_offset = None;
+		let mut value_leap_seconds = None;
 
 		if let Some(prop_offset) = prop.get("offset") {
 			if prop_offset.as_i64().is_some() {
@@ -470,13 +470,11 @@ impl NetworkTimezone {
 			}
 		}
 
-		let value = Some(Self {
+		Self {
 			offset: value_offset,
 			dst_offset: value_dst_offset,
 			leap_seconds: value_leap_seconds,
-		});
-
-		return value;
+		}
 	}
 }
 
